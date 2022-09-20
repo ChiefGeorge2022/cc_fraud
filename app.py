@@ -3,7 +3,7 @@ import pickle
 import pandas as pd
 
 
-#---------------WebApp Setup-----------------#
+#---------------Page Setup-----------------#
 
 # st.set_page_config(layout="wide")
 with open("style.css") as f:
@@ -11,30 +11,29 @@ with open("style.css") as f:
 
 # Set Title
 st.title("Credit Card Fraud Detection")
-st.image('fraud_detection.png')
+st.image('credit_card.png')
 st.markdown('#')
 
-
+# --------------- Slider Section-----------------------------
 st.sidebar.markdown(f" ## :gear: Credit Card Features")
-st.sidebar.write("Use each sliders to adjust the credit card's features. As you adjust the sliders, the table updates accordingly.")
+st.sidebar.write("Each sliders are used to adjust the credit card's transaction details.")
 st.sidebar.markdown('---')
 
 
 # Fuction for loading and caching the model
 @st.cache(allow_output_mutation=True)
 def load_data():
-    model = pickle.load(open("RF_model.pkl", "rb"))
+    model = pickle.load(open("XGB_model.pkl", "rb"))
     return model
 
-#Load model
-RF_model = load_data()
+#Load xgb model
+XG_model = load_data()
 
 
 #----------------Dataset Section---------------#
 data = pd.read_csv('Important_Features.csv')
 
-
-def user_paramters():
+def features():
     V2 = st.sidebar.slider('V2', data.V2.min(), data.V2.max(), float(data.V2.median()))
     V3 = st.sidebar.slider('V3', data.V3.min(), data.V3.max(), float(data.V3.median()))
     V4 = st.sidebar.slider('V4', data.V4.min(), data.V4.max(), float(data.V4.median()))
@@ -46,39 +45,25 @@ def user_paramters():
     V16 = st.sidebar.slider('V16', data.V16.min(), data.V16.max(), float(data.V16.median()))
     V17 = st.sidebar.slider('V17', data.V17.min(), data.V17.max(), float(data.V17.median()))
     
-    input_data = {
-            'V4':V4,
-            'V14':V14,
-            'V10':V10,
-            'V12':V12,
-            'V17':V17,
-            'V16':V16,
-            'V3':V3,
-            'V11':V11,
-            'V2':V2,
-            'V9':V9}
+    input_data = {'V4':V4,'V14':V14, 'V10':V10,'V12':V12,'V17':V17,'V16':V16,'V3':V3,'V11':V11,'V2':V2,'V9':V9}
 
     # Create input data
-    features = pd.DataFrame(input_data, index=[0])
+    input_features = pd.DataFrame(input_data, index=[0])
     
-    return features
+    return input_features
 
 # collect user inputs
-df = user_paramters()
+df = features()
 
-
-st.subheader('Selected Credit Card Features')
-st.write(df)
-st.markdown('#')
 
 # -----------------Predictions-----------------------
 
-predictions = RF_model.predict(df)
+predictions = XG_model.predict(df)
 
 st.markdown(f"### Model Prediction")
 
 if predictions == 0:
-    st.success('This transaction is valid!')
+    st.success('This credit card transaction is valid!')
 else:
-    st.error('This transaction is Fraudulent!')
+    st.error('This credit card transaction is Fraudulent!')
 
